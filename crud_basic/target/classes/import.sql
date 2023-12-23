@@ -1,0 +1,1 @@
+insert into info values (1,'jk@gmail.com','jajja');

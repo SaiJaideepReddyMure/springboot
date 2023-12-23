@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Info</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+             
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-image: url('data:image/jpeg;base64,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'); /* Add your image URL here */
+            background-size: cover;
+            background-position: center;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 20px auto 0 auto; /* Center the form at the top */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Add New Info</h2>
+
+    <!-- Your form content for adding new info -->
+    <form th:action="@{/add}" method="post">
+        <label for="id">ID:</label>
+        <input type="text" id="id" name="id" required />
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+
+        <button type="submit">Add Info</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        // Use jQuery to handle the form submission
+        $('form').submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Perform an AJAX request to submit the form data
+            $.ajax({
+                url: $(this).attr('action'), // Get the form action attribute
+                type: 'POST',
+                data: $(this).serialize(), // Serialize the form data
+                success: function () {
+                    // Redirect to the display page after successful submission
+                    window.location.href = '/display';
+                },
+                error: function () {
+                    alert('Error submitting form');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
