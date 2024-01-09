@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .quiz-container {
+            width: 80%;
+            margin: auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #3498db;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .option-btn {
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+            color: #000;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option-btn:hover {
+            background-color: #c0c0c0;
+        }
+
+        .option-btn.selected {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .bottom-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .top-buttons {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .top-buttons button, .bottom-buttons button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .top-buttons button:hover, .bottom-buttons button:hover {
+            background-color: #297fb8;
+        }
+
+        #submitBtn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Quiz Questions</h1>
+
+        <div id="questions">
+            <div class="question" th:each="question, questionIndex : ${questions}" th:style="${questionIndex.index == 0} ? '' : 'display: none'" id="question${questionIndex.index}">
+                <p><strong>Question:</strong> <span th:text="${question.questionText}"></span></p>
+                <div class="options">
+                    <button class="option-btn" th:text="${question.option_a}" onclick="selectOption(this)"></button>
+                    <button class="option-btn" th:text="${question.option_b}" onclick="selectOption(this)"></button>
+                    <button class="option-btn" th:text="${question.option_c}" onclick="selectOption(this)"></button>
+                    <button class="option-btn" th:text="${question.option_d}" onclick="selectOption(this)"></button>
+                </div>
+                <p><strong>Selected Answer:</strong> <span id="selectedAnswer"></span></p>
+                <div class="bottom-buttons">
+                    <button onclick="saveAndNext()">Save and Next</button>
+                    <button onclick="goBack()">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="top-buttons">
+            <th:block th:each="index : ${#numbers.sequence(0, questions.size() - 1)}">
+                <button th:text="'Question ' + (${index} + 1)" th:onclick="'showQuestion(' + ${index} + ')'" ></button>
+            </th:block>
+            <button id="submitBtn" onclick="submitQuiz()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        var currentQuestionIndex = 0;
+        var userAnswers = new Array('${questions.size()}');
+
+        function showQuestion(index) {
+            var questions = document.querySelectorAll('.question');
+            questions.forEach(function (question, questionIndex) {
+                if (questionIndex === index) {
+                    question.style.display = 'block';
+                } else {
+                    question.style.display = 'none';
+                }
+            });
+            currentQuestionIndex = index;
+
+            if (index === questions.length - 1) {
+                // Last question, show submit button
+                document.getElementById('submitBtn').style.display = 'block';
+            } else {
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+
+            // Set selected answer to the previously selected option (if any)
+            var selectedAnswerElement = document.getElementById('selectedAnswer');
+            var selectedOption = document.querySelector('.question[style="display: block"] .option-btn.selected');
+            selectedAnswerElement.innerText = selectedOption ? selectedOption.innerText : '';
+        }
+
+        function selectOption(option) {
+            var selectedAnswerElement = document.getElementById('selectedAnswer');
+            selectedAnswerElement.innerText = option.innerText;
+
+            // Reset all buttons to unselected state
+            document.querySelectorAll('.option-btn').forEach(function (btn) {
+                btn.classList.remove('selected');
+            });
+
+            // Select the current option
+            option.classList.add('selected');
+
+            // Store the selected answer
+            userAnswers[currentQuestionIndex] = option.innerText;
+        }
+
+        function saveAndNext() {
+            var questions = document.querySelectorAll('.question');
+            var currentQuestion = questions[currentQuestionIndex];
+            var selectedOption = currentQuestion.querySelector('.option-btn.selected');
+
+            // If the user didn't select an option, show an alert
+            if (!selectedOption) {
+                alert('Please select an option');
+                return;
+            }
+
+            // Otherwise, go to the next question
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function goBack() {
+            currentQuestionIndex--;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function submitQuiz() {
+            // Display user answers (for demonstration purposes)
+            alert('User Answers: ' + JSON.stringify(userAnswers));
+        }
+
+        showQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>

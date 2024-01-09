@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Result</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        p {
+            font-size: 20px;
+            text-align: center;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        /* You can add more styles as needed */
+    </style>
+</head>
+<body>
+    <h1>Quiz Result</h1>
+    <p th:text="'Correct Answers: ' + ${correctAnswers}"></p>
+</body>
+</html>
