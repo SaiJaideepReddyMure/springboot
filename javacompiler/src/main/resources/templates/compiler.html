@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Java Compiler</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa; /* LeetCode background color */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #app-bar {
+            background-color: #343a40; /* App bar background color */
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #app-bar p {
+            margin: 0;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            height: 75vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #question-container,
+        #code-container {
+            flex-grow: 1;
+            overflow: auto;
+            box-sizing: border-box;
+            padding: 20px;
+            height: 100%;
+            width: 50%;
+        }
+
+        .draggable-bar {
+            width: 10px;
+            cursor: ew-resize;
+            background-color: #ddd;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -5px;
+            z-index: 1;
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 400px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 0;
+            padding: 10px;
+            color: #333;
+            overflow: auto;
+            resize: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .passed {
+            background-color: #d4edda; /* LeetCode passed test case color */
+        }
+
+        .failed {
+            background-color: #f8d7da; /* LeetCode failed test case color */
+        }
+
+        .tick, .cross {
+            font-size: 18px;
+            margin-right: 5px;
+        }
+
+        #compile-button-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 10px;
+            margin-right: 20px;
+        }
+
+        #compile-button-container form {
+            margin-right: 10px;
+        }
+
+        #compile-button-container input[type="submit"],
+        #compile-button-container input[type="button"],
+        #compile-button-container button {
+            width: auto;
+            padding: 8px 15px;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+ 
+<body>
+     
+    <div id="app-bar">
+        <p>Timer: <span th:text="${timer}"></span></p>
+        <h1>Java Compiler</h1>
+        <p>Registration Number: <span th:text="${reg_no}"></span></p>
+    </div>
+
+    <!-- Compiler Container -->
+    <div class="container" th:if="${check}==1">
+        <!-- Question Container -->
+        <div id="question-container">
+            <h2>Question:</h2>
+            <p th:text="${question.ques}"></p>
+        </div>
+
+        <div class="draggable-bar" id="draggable-bar"></div>
+
+        <!-- Code Container -->
+        <div id="code-container" >
+            <form id="compileForm" method="post" th:object="${code}" onsubmit="return validateCode();">
+                <input type="hidden" name="questionId" th:value="${question.id}" />
+                <textarea id="sourceCode" name="sourceCode" th:field="${code.sourceCode}" class="code-textarea" placeholder="Enter Java code" required></textarea>
+
+                <!-- First Button (Compile and Run) -->
+                <input type="submit" value="Compile and Run" style="display: none;" id="compileAndRunBtn" formaction="/compile">
+
+                <!-- Second Button (Another Button) -->
+                <input type="submit" value="Another Button" style="display: none;" id="anotherBtn" formaction="/tester">
+                <!-- Third Button (Another Button) -->
+                <input type="submit" value="Submit" style="display: none;" id="sBtn" formaction="/submit">
+            </form>
+        </div>
+    </div>
+
+    <!-- Compile Button Container -->
+    <div id="compile-button-container">
+        <button type="button" onclick="submitForm()">Compile</button>
+        <button type="button" onclick="TestsubmitForm()">Run Test</button>
+        <button type="button" onclick="ssubmitForm()">Submit</button>
+    </div>
+
+    <!-- Display Open Test Cases Compilation Results -->
+    <h2>Open Test Cases:</h2>
+    <table th:if="${openCompilationResult != null}">
+        <!-- Your table content -->
+    </table>
+    <!-- Display Closed Test Cases Compilation Results -->
+    <h2>Closed Test Cases:</h2>
+    <div th:if="${closedCompilationResult != null}" style="display: flex;">
+        <!-- Your closed test cases content -->
+    </div>
+
+    <!-- Script to handle form submission, navigation, etc. -->
+    <script>
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        // Extract the registration number from the span element
+        const regNo = document.getElementById('reg_no').textContent; // Assuming 'reg_no' is the ID of the span element
+        
+        // Check if the URL already contains the registration number
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has('reg_no')) {
+            // Redirect to the desired URL ("/page") with the registration number
+            window.location.href = "/?reg_no="+regNo;
+        }
+    });
+
+ 
+
+        function submitForm() {
+            document.getElementById("compileAndRunBtn").click();
+        }
+        
+        function TestsubmitForm() {
+            document.getElementById("anotherBtn").click();
+        }
+        
+        function ssubmitForm() {
+            document.getElementById("sBtn").click();
+            // After submitting, navigate to the next question if available
+            var currentQuestionId = parseInt(document.getElementById("questionId").value);
+            var nextQuestionId = currentQuestionId + 1;
+            window.location.href = "/question/" + nextQuestionId;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const draggableBar = document.getElementById('draggable-bar');
+            const questionContainer = document.getElementById('question-container');
+            const codeContainer = document.getElementById('code-container');
+            const container = document.querySelector('.container');
+
+            let isDragging = false;
+
+            draggableBar.addEventListener('mousedown', function (event) {
+                isDragging = true;
+            });
+
+            document.addEventListener('mousemove', function (event) {
+                if (isDragging) {
+                    const containerRect = container.getBoundingClientRect();
+                    const mouseX = event.clientX;
+
+                    const questionWidth = mouseX - containerRect.left;
+                    const codeWidth = containerRect.width - mouseX;
+
+                    questionContainer.style.width = `${questionWidth}px`;
+                    codeContainer.style.width = `${codeWidth}px`;
+
+                    draggableBar.style.left = `${mouseX - containerRect.left - 5}px`;
+                }
+            });
+
+            document.addEventListener('mouseup', function () {
+                isDragging = false;
+            });
+        });
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+        };
+    </script>
+</body>
+</html>

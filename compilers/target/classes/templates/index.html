@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Compiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #testResults {
+            margin-top: 20px;
+        }
+
+        .testCase {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .testCase strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Code Compiler</h1>
+
+<div>
+    <label for="code">Enter your code:</label>
+    <textarea id="code" rows="10" cols="50"></textarea>
+</div>
+
+<div>
+    <label for="language">Select language:</label>
+    <select id="language">
+        <option value="java">Java</option>
+        <option value="python">Python</option>
+        <option value="c">C</option>
+    </select>
+</div>
+
+<button onclick="compileCode()">Compile and Run</button>
+
+<div>
+    <h3>Test Results</h3>
+    <div id="testResults"></div>
+</div>
+
+<script>
+function JavaSourceFromString(name, code) {
+    this.name = name;
+    this.code = code;
+}
+
+JavaSourceFromString.prototype = Object.create(null, {
+    constructor: {
+        value: JavaSourceFromString,
+        enumerable: false,
+        writable: true,
+        configurable: true
+    },
+    get kind() {
+        return 'source';
+    },
+    get shortName() {
+        return this.name;
+    },
+    get name() {
+        return this.name;
+    },
+    get isNameCompatible() {
+        return true;
+    },
+    get content() {
+        return this.code;
+    },
+    toString: {
+        value: function () {
+            return this.name;
+        },
+        enumerable: false,
+        writable: true,
+        configurable: true
+    }
+});
+
+function replaceScannerInputs(code, inputs) {
+    inputs.forEach((input, i) => {
+        code = `Scanner input${i + 1} = new Scanner(new ByteArrayInputStream("${input.replace(/"/g, '\\"')}".getBytes()));\n` + code;
+    });
+    return code;
+}
+
+function appendResultToDOM(testCase, index) {
+    const testResultsDiv = document.getElementById('testResults');
+
+    const resultDiv = document.createElement('div');
+    resultDiv.classList.add('testCase');
+
+    const resultText = document.createElement('p');
+    resultText.innerHTML = `<strong>Test Case ${index + 1}:</strong><br>
+        Input: ${testCase.input}<br>
+        Expected Output: ${testCase.expectedOutput}<br>
+        Actual Output: ${testCase.actualOutput}<br>
+        Success: ${testCase.success ? 'Yes' : 'No'}`;
+
+    resultDiv.appendChild(resultText);
+    testResultsDiv.appendChild(resultDiv);
+}
+
+f// Predefined test cases
+const predefinedTestCases = [
+    { input: "2", expectedOutput: "2" },
+    { input: "3", expectedOutput: "3" },
+    // Add more test cases as needed
+];
+
+ 
+
+function compileCode() {
+    const code = document.getElementById('code').value;
+    const language = document.getElementById('language').value;
+
+    // Clear previous results
+    document.getElementById('testResults').innerHTML = '';
+
+    // Process each test case
+    predefinedTestCases.forEach((testCase, index) => {
+        const inputs = testCase.input.split(',').map(input => parseInt(input.trim())); // Convert input values to integers
+
+        // Replace the Scanner input lines with predefined input values
+        let formattedCode = replaceScannerInputs(code, inputs);
+
+        fetch('/open/compile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                code: formattedCode,
+                language: language,
+                options: ["--enable-preview"],
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Test Case ${index + 1} Results:`, data);
+
+            if (data.output !== undefined) {
+                const success = data.success && testCase.expectedOutput === data.output.trim();
+
+                // Display the result for the current test case
+                appendResultToDOM({
+                    input: inputs.join(', '), // Display inputs as a comma-separated string
+                    expectedOutput: testCase.expectedOutput,
+                    actualOutput: data.output.trim(),
+                    success: success
+                }, index);
+            } else {
+                console.error(`Error during execution of Test Case ${index + 1}: Output is undefined`);
+            }
+        })
+        .catch(error => {
+            console.error(`Error during execution of Test Case ${index + 1}: ${error.message}`);
+        });
+    });
+}
+
+</script>
+
+</body>
+</html>

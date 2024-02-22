@@ -1,0 +1,52 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Code Runner</title>
+</head>
+<body>
+    <h1>Java Code Runner</h1>
+    <form th:action="@{/code/compile}" method="post">
+    <label for="code">Enter Java Code:</label><br>
+    <textarea id="code" name="code" rows="10" cols="50" th:name="code" th:value="${code}"></textarea><br>
+    <button type="submit">Compile and Run</button>
+</form>
+
+
+
+
+    <!-- Display the output -->
+    <div th:if="${output}">
+        <h2>Output:</h2>
+        <pre th:text="${output}"></pre>
+    </div>
+
+    <!-- Add a button to trigger the predefined test cases -->
+    <form th:action="@{/code/test}" method="post">
+        <button type="submit">Run Predefined Test Cases</button>
+    </form>
+
+    <!-- Display the test results -->
+    <div th:if="${results}">
+        <h2>Test Results:</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Input</th>
+                    <th>Actual Output</th>
+                    <th>Expected Output</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="result : ${results}">
+                    <td th:text="${result.input}"></td>
+                    <td th:text="${result.actualOutput}"></td>
+                    <td th:text="${result.expectedOutput}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
