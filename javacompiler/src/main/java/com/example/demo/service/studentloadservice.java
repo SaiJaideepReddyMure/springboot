@@ -28,6 +28,12 @@ public class studentloadservice {
 		 
 		return  sd.checkstatus(exam_id,reg_no);
 	}
+
+
+	public Object setstatus(int exam_id, String reg_no) {
+		 return sd.setstatus(exam_id,reg_no);
+		
+	}
 	
 
 }

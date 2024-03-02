@@ -32,5 +32,10 @@ public class examService {
 		// TODO Auto-generated method stub
 		return  erepo.gettimer(exam_id);
 	}
+	public int getNo_questions(int exam_id) {
+		// TODO Auto-generated method stub
+		return erepo.getnoofquestions(exam_id);
+	}
+	 
 
 }

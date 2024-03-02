@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="number"],
+        input[type="date"],
+        input[type="time"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        .question-box {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .question-box h3 {
+            margin-top: 0;
+        }
+        .delete-btn {
+            padding: 8px 16px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Create Quiz</h2>
+    <button id="createQuizBtn" onclick="showCreateQuizForm()">Create Quiz</button>
+    <div id="quizForm" style="display: none;">
+        <form action="/questions/submitQuiz" method="post">
+
+            <!-- Quiz Duration and Date & Time -->
+            <div class="form-group">
+                <label for="quizDuration">Quiz Duration (in minutes):</label>
+                <input type="number" id="quizDuration" name="timer" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="quizDate">Quiz Date:</label>
+                <input type="date" id="quizDate" name="quizDate" required>
+            </div>
+            <div class="form-group">
+                <label for="quizTime">Quiz Start Time:</label>
+                <input type="time" id="quizTime" name="quizTime" required>
+            </div>
+
+           <!-- First Question -->
+<div class="question-box" id="question1">
+    <h3>Question 1</h3>
+    <div class="form-group">
+        <label for="ques1">Question:</label>
+        <textarea id="ques1" name="ques" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="opentestcases1">Open Test Cases:</label>
+        <textarea id="opentestcases1" name="opentestCases[]" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="opentestcasesoutput1">Open Test Cases Output:</label>
+        <textarea id="opentestcasesoutput1" name="opentestCasesoutput[]" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="closedtestcases1">Closed Test Cases:</label>
+        <textarea id="closedtestcases1" name="closedtestCases[]" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="closedtestcasesoutput1">Closed Test Cases Output:</label>
+        <textarea id="closedtestcasesoutput1" name="closedtestCasesoutput[]" rows="4" required></textarea>
+    </div>
+    <button type="button" class="delete-btn" onclick="deleteQuestion('question1')">Delete</button>
+</div>
+
+            <!-- Container for dynamically added questions -->
+            <div id="questions-container"></div>
+            
+            <button type="button" id="add-question-btn" onclick="addQuestion()">Add Another Question</button>
+            <br><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showCreateQuizForm() {
+        document.getElementById("createQuizBtn").style.display = "none";
+        document.getElementById("quizForm").style.display = "block";
+    }
+
+    function addQuestion() {
+        const questionsContainer = document.getElementById('questions-container');
+        const questionIndex = questionsContainer.childElementCount + 1;
+        const questionDiv = document.createElement('div');
+        questionDiv.classList.add('question-box');
+        questionDiv.id = 'question' + questionIndex;
+
+        // Create fields for the new question
+        const questionFields = `
+            <div class="question-box" id="question${questionIndex}">
+                <h3>Question ${questionIndex}</h3>
+                <div class="form-group">
+                    <label for="ques${questionIndex}">Question:</label>
+                    <textarea id="ques${questionIndex}" name="ques" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="opentestcases${questionIndex}">Open Test Cases:</label>
+                    <textarea id="opentestcases${questionIndex}" name="opentestCases" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="opentestcasesoutput${questionIndex}">Open Test Cases Output:</label>
+                    <textarea id="opentestcasesoutput${questionIndex}" name="opentestCasesoutput" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="closedtestcases${questionIndex}">Closed Test Cases:</label>
+                    <textarea id="closedtestcases${questionIndex}" name="closedtestCases" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="closedtestcasesoutput${questionIndex}">Closed Test Cases Output:</label>
+                    <textarea id="closedtestcasesoutput${questionIndex}" name="closedtestCasesoutput" rows="4" required></textarea>
+                </div>
+                <button type="button" class="delete-btn" onclick="deleteQuestion('question${questionIndex}')">Delete</button>
+            </div>
+        `;
+
+        questionDiv.innerHTML = questionFields;
+        questionsContainer.appendChild(questionDiv);
+    }
+
+    function deleteQuestion(questionId) {
+        const questionToRemove = document.getElementById(questionId);
+        questionToRemove.remove();
+    }
+</script>
+
+</body>
+</html>

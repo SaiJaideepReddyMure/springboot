@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Question</title>
+    <style>
+        /* CSS for styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .question-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        .question-container label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .question-container input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;
+        }
+
+        .delete-button {
+            background-color: #f44336;
+        }
+
+        .delete-button:hover {
+            background-color: #da190b;
+        }
+
+        .timer-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-container input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+    <script>
+        function addQuestion() {
+        	console.log("Adding a new question...");
+            var questionForm = document.getElementById("questionForm");
+            var questionContainers = document.getElementsByClassName("question-container");
+            var lastQuestionContainer = questionContainers[questionContainers.length - 1];
+            var newQuestionDiv = document.createElement("div");
+            newQuestionDiv.classList.add("question-container");
+            newQuestionDiv.innerHTML = `
+                <button type="button" onclick="deleteQuestion(this)" class="delete-button">Delete</button>
+                <hr>
+                <label>Question: <input type="text" name="questionList[${questionContainers.length}].Ques" /></label><br/>
+                <label>Open Test Cases (comma-separated): <input type="text" name="questionList[${questionContainers.length}].opentestCases" /></label><br/>
+                <label>Open Test Cases Output (comma-separated): <input type="text" name="questionList[${questionContainers.length}].opentestCasesoutput" /></label><br/>
+                <label>Closed Test Cases (comma-separated): <input type="text" name="questionList[${questionContainers.length}].closedtestCases" /></label><br/>
+                <label>Closed Test Cases Output (comma-separated): <input type="text" name="questionList[${questionContainers.length}].closedtestCasesoutput" /></label><br/>
+            `;
+            // Insert new question after the last one
+            lastQuestionContainer.insertAdjacentElement('afterend', newQuestionDiv);
+        }
+
+        function deleteQuestion(button) {
+            button.parentNode.remove();
+        }
+
+        function validateForm() {
+            var quizDateTime = document.getElementById("quizDateTime").value;
+            var errorMessage = document.getElementById("errorMessage");
+            if (!quizDateTime) {
+                errorMessage.textContent = "Please select a date and time for the quiz.";
+                return false;
+            }
+            return true;
+        }
+
+        function clearErrorMessage() {
+            var errorMessage = document.getElementById("errorMessage");
+            errorMessage.textContent = "";
+        }
+    </script>
+</head>
+<body>
+    <h2>Add New Question</h2>
+
+    <form id="questionForm" action="/addQuestions" method="post" onsubmit="return validateForm()">
+        <!-- Initial set of input fields for the first question -->
+         <div class="timer-container">
+            <label>Quiz Time (minutes):</label>
+            <input type="number" id="timer" name="quizTime" value="30" min="0" step="1">
+            <br>
+            <label>Exam Date and Time: <input type="datetime-local" id="quizDateTime" name="quizDateTime" /></label><br/>
+            <span id="errorMessage" class="error"></span>
+        </div>
+        <div class="question-container">
+            <label>Question: <input type="text" name="questionList[0].Ques" /></label><br/>
+            <label>Open Test Cases (comma-separated): <input type="text" name="questionList[0].opentestCases" /></label><br/>
+            <label>Open Test Cases Output (comma-separated): <input type="text" name="questionList[0].opentestCasesoutput" /></label><br/>
+            <label>Closed Test Cases (comma-separated): <input type="text" name="questionList[0].closedtestCases" /></label><br/>
+            <label>Closed Test Cases Output (comma-separated): <input type="text" name="questionList[0].closedtestCasesoutput" /></label><br/>
+        </div>
+
+         <!-- Button to add more questions -->
+        <div class="button-container">
+            <button type="button" onclick="addQuestion()">Add Another Question</button><br/>
+        </div>
+
+        <!-- Submit button -->
+        <div class="button-container">
+            <input type="submit" value="Submit"/>
+        </div>
+    </form>
+</body>
+</html>

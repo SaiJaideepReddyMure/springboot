@@ -18,5 +18,7 @@ String findClassIdsForExam(int examId);
 	LocalDateTime findtimeactBy(int exam_ids);
     @Query(value="SELECT timer from exam_data where exam_id=?1",nativeQuery = true)
 	int gettimer(Integer exam_id);
+    @Query(value = "select no_questions from exam_data where exam_id= ?1",nativeQuery = true)
+	int getnoofquestions(int exam_id);
 
 }

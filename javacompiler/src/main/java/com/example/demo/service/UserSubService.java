@@ -8,18 +8,23 @@ import com.example.demo.reposistory.UserSubRepository;
 @Service
 public class UserSubService {
 
-    private final UserSubRepository userSubRepository;
+    private final UserSubRepository usersubRepository;
 
     public UserSubService(UserSubRepository userSubRepository) {
-        this.userSubRepository = userSubRepository;
+        this.usersubRepository = userSubRepository;
     }
 
     public void saveUserSub(usersub userSub) {
     	 
     	 
-        userSubRepository.save(userSub);
+        usersubRepository.save(userSub);
 
     	
     	}
+
+	public boolean checking(String s) {
+		// TODO Auto-generated method stub
+		return  usersubRepository.existsById(s);
+	}
    
 }
