@@ -115,13 +115,14 @@
             padding: 8px 15px;
             margin: 0 5px;
         }
+    
               
     </style>
 </head>
  
 <body>
      
-   <!-- Timer and Registration Number -->
+   
     <div id="app-bar">
         <div id="timer-info">
             <p>Timer: <span id="timer" th:text="${timers}"></span></p>
@@ -129,13 +130,19 @@
         <div id="registration-info">
             <p>Registration Number: <span th:text="${reg_no}"></span></p>
         </div>
+        <div id = 'la'>
+         <p>Lang : <span th:text="${lang}"></span></p>
+        
+        </div>
     </div>
-
-    <!-- Compiler Container -->
+ 
+ 
+ <div id="refreshable-content">
     <div class="container"  >
         <!-- Question Container -->
         <div id="question-container">
             <h2>Question:</h2>
+            <p>Write your code inside the main function:</p>
             <p th:text="${question.ques}"></p>
         </div>
 
@@ -145,9 +152,10 @@
         <div id="code-container" >
             <form id="compileForm" method="post" th:object="${code}" onsubmit="return validateCode();">
                 <input type="hidden" name="questionId" th:value="${question.id}" />
-                <textarea id="sourceCode" name="sourceCode" th:field="${code.sourceCode}" class="code-textarea" placeholder="Enter Java code" required></textarea>
+                <textarea id="sourceCode" name="sourceCode" th:field="${code.sourceCode}" class="code-textarea" placeholder="Enter Java code" ></textarea>
                 <input type="hidden" name="questionId" th:value="${question.id}" />
-                 <input type="hidden" name="timer" th:value="${timers}" />
+                <input type="hidden" name="exam_id" th:value="${exam_id}" />
+    <input type="hidden" name="scount" th:value="${scount}" />
                  <input type="hidden" name="reg_no" th:value="${reg_no}" />
                 <!-- First Button (Compile and Run) -->
                 <input type="submit" value="Compile and Run" style="display: none;" id="compileAndRunBtn" formaction="/compile">
@@ -156,6 +164,8 @@
                 <input type="submit" value="Another Button" style="display: none;" id="anotherBtn" formaction="/tester">
                 <!-- Third Button (Another Button) -->
                 <input type="submit" value="Submit" style="display: none;" id="sBtn" formaction="/submit">
+                <input type="submit" value="AutoSubmit" style="display: none;" id="autoBtn" formaction="/autosubmit">
+                
             </form>
         </div>
     </div>
@@ -165,9 +175,10 @@
         <button type="button" onclick="submitForm()">Compile</button>
         <button type="button" onclick="TestsubmitForm()">Run Test</button>
         <button type="button" onclick="ssubmitForm()">Submit</button>
+        <button type ="button" onclick ="autosubmit()" style="display: none;"> Auto</button>
     </div>
 
- <!-- Display Open Test Cases Compilation Results -->
+   <div id="open-test-cases">   
     <h2>Open Test Cases:</h2>
     <table th:if="${openCompilationResult != null}">
         <tr>
@@ -186,7 +197,8 @@
             </td>
         </tr>
     </table>
-    <!-- Display Closed Test Cases Compilation Results -->
+    </div>
+    <div id="closed-test-cases">    
     <h2>Closed Test Cases:</h2>
     <div th:if="${closedCompilationResult != null}" style="display: flex;">
         <div th:each="testCaseResult, index : ${closedCompilationResult.outputResults}" style="margin-right: 10px;">
@@ -197,14 +209,130 @@
             </p>
         </div>
     </div>
- 
+    </div>
+     
+ </div>
 <script>
+ 
+
+  
+
+function submitForm() {
+      // Show loading animation
+
+    var formData = new FormData(document.getElementById("compileForm"));
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var response = this.responseText;
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(response, 'text/html');
+            var testCasesHTML = doc.getElementById("open-test-cases").innerHTML;
+
+            // Update the test cases container with the extracted HTML
+            document.getElementById("open-test-cases").innerHTML = testCasesHTML;
+
+             // Hide loading animation
+        }
+    };
+    xhttp.open("POST", "/compile", true);
+    xhttp.send(formData);
+}
+
+function TestsubmitForm() {
+ 
+    var formData = new FormData(document.getElementById("compileForm"));
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var response = this.responseText;
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(response, 'text/html');
+            var openTestCasesHTML = doc.getElementById("open-test-cases").innerHTML;
+            var closedTestCasesHTML = doc.getElementById("closed-test-cases").innerHTML;
+
+            // Update the test cases containers with the extracted HTML
+            document.getElementById("open-test-cases").innerHTML = openTestCasesHTML;
+            document.getElementById("closed-test-cases").innerHTML = closedTestCasesHTML;
+ 
+        }
+    };
+    xhttp.open("POST", "/tester", true);
+    xhttp.send(formData);
+}
+
+function ssubmitForm() {
+	console.log("Hello world");
+	
+    var formData = new FormData(document.getElementById("compileForm"));
+    var xhttp = new XMLHttpRequest();
+   
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var response = this.responseText;
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(response, 'text/html');
+            
+            try{
+            var questionHTML = doc.getElementById("question-container").innerHTML;
+            }catch(error){
+                
+                window.location.href = "/completed"; // Redirect to completed page if it's the last question
+            
+            }            
+            var codeContainerHTML = doc.getElementById("code-container").innerHTML;
+            var openTestCasesHTML = doc.getElementById("open-test-cases").innerHTML;
+            var closedTestCasesHTML = doc.getElementById("closed-test-cases").innerHTML;
+
+            // Update the content of the question, code container, and test cases containers with the extracted HTML
+            document.getElementById("question-container").innerHTML = questionHTML;
+            document.getElementById("code-container").innerHTML = codeContainerHTML;
+            document.getElementById("open-test-cases").innerHTML = openTestCasesHTML;
+            document.getElementById("closed-test-cases").innerHTML = closedTestCasesHTML;
+
+            var nextQuestion = doc.getElementById("question-container").textContent.trim();
+          
+            
+        }
+    };
+ 
+    xhttp.open("POST", "/submit", true);
+    xhttp.send(formData);
+	   
+}
+function autosubmit() {
+	console.log("auto");
+    document.getElementById("autoBtn").click();
+}
+
+
+
+
+ function reloadContent() {
+		    var refreshableContent = document.getElementById('refreshable-content');
+		    refreshableContent.innerHTML = refreshableContent.innerHTML;
+		}
     document.addEventListener('DOMContentLoaded', function () {
-    	openFullscreen();
-    	var timerElement = document.getElementById('timer');
+        openFullscreen();
+        var timerElement = document.getElementById('timer');
         var timerValue = timerElement.textContent.trim(); // Get the text content of the timer element
         var duration = parseInt(timerValue); // Convert to integer
         var display = document.querySelector('#timer');
+
+        // Retrieve reg_no from localStorage or set a default value
+        var reg_no = localStorage.getItem('reg_no');
+        if (!reg_no) {
+            reg_no = "YourDefaultRegNo";
+            localStorage.setItem('reg_no', reg_no);
+        }
+
+        // Retrieve timer from localStorage or set a default value
+        var storedTimer = localStorage.getItem('timer');
+        if (!storedTimer) {
+            storedTimer = "YourDefaultTimerValue";
+            localStorage.setItem('timer', storedTimer);
+        }
+
         if (!isNaN(duration)) { // Check if duration is a valid number
             startTimer(duration, display);
         } else {
@@ -271,52 +399,101 @@
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
         display.textContent = minutes + ":" + seconds;
+        if (timer <= 0) {
+            // Automatically trigger autosubmit when timer reaches zero
+            autosubmit();
+        }
+    }
+    var hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+        hidden = "hidden";
+        visibilityChange = "visibilitychange";
+    } else if (typeof document.msHidden !== "undefined") {
+        hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+    } else if (typeof document.webkitHidden !== "undefined") {
+        hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
     }
 
-    function submitForm(event) {
-    	
-    	document.getElementById("compileAndRunBtn").click();
-    	 
+    function handleVisibilityChange() {
+        if (document[hidden]) {
+            // Page is hidden, trigger logout action
+            window.location.href = "/loginpage";
+        }
     }
 
-    function TestsubmitForm(event) {
-    	 
-        document.getElementById("anotherBtn").click();
-         
-    }
+    document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
-    function ssubmitForm(event) {
-    	 
-        document.getElementById("sBtn").click();
-        
-         
-    }
+  //  function submitForm(event) {
+   //     document.getElementById("compileAndRunBtn").click();
+  //   }
+
+    //function TestsubmitForm(event) {
+   //     document.getElementById("anotherBtn").click();
+   // }
+
+   // function ssubmitForm(event) {
+  //      document.getElementById("sBtn").click();
+// }
 
     // Function to make the document full-screen
     function openFullscreen() {
-            const element = document.documentElement;
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.mozRequestFullScreen) { /* Firefox */
-                element.mozRequestFullScreen();
-            } else if (element.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-                element.webkitRequestFullscreen();
-            } else if (element.msRequestFullscreen) { /* IE/Edge */
-                element.msRequestFullscreen();
-            }
+        const element = document.documentElement;
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) { /* Firefox */
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) { /* IE/Edge */
+            element.msRequestFullscreen();
         }
+    }
 
-    // Open full-screen mode when the document loads
-   // document.addEventListener('DOMContentLoaded', function () {
-   //     openFullscreen();
-    // });
-
-    // Prevent history manipulation
     history.pushState(null, null, location.href);
     window.onpopstate = function () {
         history.pushState(null, null, location.href);
     };
+ // Function to send AJAX request to /kl endpoint every minute
+   function triggerKLController() {
+    setInterval(function () {
+        // Retrieve reg_no from the span element inside #registration-info
+        var reg_no = document.querySelector('#registration-info span').textContent.trim();
+
+        // Retrieve timer from the span element inside #timer-info
+        var timer = document.querySelector('#timer-info span').textContent.trim();
+
+        // Retrieve exam_id from the hidden input field
+        var exam_id = document.querySelector('input[name="exam_id"]').value;
+
+        // Create a query string with the parameters
+        var params = "reg_no=" + encodeURIComponent(reg_no) + "&timer=" + encodeURIComponent(timer) + "&exam_id=" + encodeURIComponent(exam_id);
+
+        // Make an AJAX request to the controller endpoint
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // Optionally, handle the response if needed
+                console.log("Triggered /kl controller successfully");
+            }
+        };
+        
+        // Append the parameters to the URL
+        xhttp.open("GET", "/kl?" + params, true);
+        xhttp.send();
+    }, 60000); // 60000 milliseconds = 1 minute
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Call the function to trigger the /kl controller on page load
+    triggerKLController();
+});
+
+
+    
 </script>
 
+ 
 </body>
 </html>

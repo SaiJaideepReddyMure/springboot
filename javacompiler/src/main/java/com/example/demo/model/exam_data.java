@@ -16,6 +16,7 @@ public class exam_data {
 	private int no_questions;
 	private LocalDateTime timeact;
 	private int timer;
+	private String lang;
 	 
 	 
 	public int getExam_id() {
@@ -23,6 +24,12 @@ public class exam_data {
 	}
 	public void setExam_id( int exam_id) {
 		this.exam_id = exam_id;
+	}
+	public String getLang() {
+		return lang;
+	}
+	public void setLang(String lang) {
+		this.lang = lang;
 	}
 	public String getClass_id() {
 		return class_id;

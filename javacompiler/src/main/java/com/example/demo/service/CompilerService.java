@@ -8,4 +8,11 @@ public interface CompilerService {
 	 
 
     CompilationResult compileAndRunWithTestCases(String sourceCode, String[] openTestCases, String[] openExpectedOutputs);
+
+	CompilationResult compileAndRunWithTestCasesForPython(String sourceCode, String[] openTestCases,
+			String[] openExpectedOutputs);
+
+	CompilationResult compileAndRunWithTestCasesForC(String sourceCode, String[] openTestCases,
+			String[] openExpectedOutputs);
+	
     }

@@ -23,4 +23,11 @@ public interface studentloaddata extends JpaRepository<studentload,Long>{
     @Modifying
     @Query(value = "UPDATE studentload SET submit = true WHERE exam_id = ?1 AND reg_no = ?2", nativeQuery = true)
     public Object setstatus(int exam_id, String reg_no);
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE studentload SET timer = ?2 WHERE exam_id = ?3 AND reg_no = ?1",nativeQuery = true)
+	public void savingtime(String reg_no, int hour, int examId);
+     
+    @Query(value="select timer from studentload where exam_id=?2 AND reg_no=?1",nativeQuery=true)
+	public int get_timer(String reg_no, Integer exam_id);
 }

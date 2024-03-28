@@ -20,5 +20,7 @@ String findClassIdsForExam(int examId);
 	int gettimer(Integer exam_id);
     @Query(value = "select no_questions from exam_data where exam_id= ?1",nativeQuery = true)
 	int getnoofquestions(int exam_id);
+    @Query(value = "select lang from exam_data where exam_id= ?1",nativeQuery = true)
+	String get_lang(Integer exam_id);
 
 }

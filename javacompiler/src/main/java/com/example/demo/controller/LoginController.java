@@ -12,10 +12,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.service.examService;
 import com.example.demo.service.studentloadservice;
+
+import jakarta.servlet.http.HttpSession;
 
  
 
@@ -36,7 +37,7 @@ public class LoginController {
         return "loginpage";
     }
     @PostMapping("/login")
-    public String login(@RequestParam String reg_no, @RequestParam String password,Model model,RedirectAttributes redirectAttributes) {
+    public String login(@RequestParam String reg_no, @RequestParam String password,Model model,HttpSession session) {
     	  LocalDateTime currentDateTime = LocalDateTime.now();
           
           if ((reg_no.equals("20BCE7287") ||  reg_no.equals("20BCE7174") )&& password.equals("password")) {
@@ -45,15 +46,18 @@ public class LoginController {
 
               for (Integer exam_id : exam_ids) {
                   LocalDateTime startTime = es.getTimmeract(exam_id);
-                  LocalDateTime endTime = startTime.plusMinutes(1000000000); 
+                  LocalDateTime endTime = startTime.plusMinutes(2000000000); 
                   
                   if (currentDateTime.isAfter(startTime) && currentDateTime.isBefore(endTime)) {
                 	  
                 	  boolean submitted = slds.checkingstatus(exam_id,reg_no);
-                	  if(!submitted)
+                	  int submitted1 = slds.loading_timer(reg_no,exam_id);
+                	  if(!submitted && submitted1 > 0)
                 	  {   
-                		                		   
-                		    return "redirect:/?reg_no=" + reg_no+ "&exam_id=" + exam_id;
+                		  session.setAttribute("reg_no", reg_no);
+                          session.setAttribute("exam_id", exam_id);            		   
+                		    
+                		    return "redirect:/";
                 	  }
                       
                       
@@ -72,6 +76,7 @@ public class LoginController {
               return "loginpage";
           }
     }
+    
 	
     
 }

@@ -36,6 +36,10 @@ public class examService {
 		// TODO Auto-generated method stub
 		return erepo.getnoofquestions(exam_id);
 	}
+	public String getting_lang(Integer exam_id) {
+		// TODO Auto-generated method stub
+		return erepo.get_lang(exam_id);
+	}
 	 
 
 }

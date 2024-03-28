@@ -34,6 +34,26 @@ public class studentloadservice {
 		 return sd.setstatus(exam_id,reg_no);
 		
 	}
+
+
+	public void updatetimer(String reg_no, String timer, String exam_id) {
+		int hour = Integer.parseInt(timer.split(":")[0]);
+		int ExamId = Integer.parseInt(exam_id);
+		sd.savingtime(reg_no,hour,ExamId);
+		
+	}
+
+
+	public int loading_timer(String reg_no, Integer exam_id) {
+		// TODO Auto-generated method stub
+		return sd.get_timer(reg_no,exam_id);
+	}
+
+
+	 
+
+
+	 
 	
 
 }
